@@ -1,3 +1,37 @@
+%{
+/**** The beginnings of a lisp evaluator. ****/
+#include <stdio.h>
+#include "y.tab.h"
+
+%}
+
+%%
+
+[!+*/=><:-]+ 		{ return SYMBOL;}
+
+[a-zA-Z][a-zA-Z0-9]*   	{
+			   yylval=strdup(yytext);
+			   return TEXT;
+			}
+
+[0-9]+  		{  
+			   yylval = atoi(yytext);
+			   return NUMBER;
+			}
+
+\n    			{ return NL;}
+\(			{ return LP;}
+\)			{ return RP;}
+
+[ ]  			;
+
+.       printf("Invalid character\n");
+
+%%
+
+int yywrap() {
+  return 1;
+}
 /* 
  * Sample Scanner1: 
  * Description: Replace the string "username" from standard input 
@@ -11,51 +45,3 @@
  *           What else could be included in this section?
  */
 
-%{
-/**** The beginnings of a lisp evaluator. ****/
-#include <stdlib.h>
-#include <stdio.h>
-
-#define PLUS "+"
-#define MINUS "-"
-#define TIMES "*"
-#define DIVIDE "/"
-#define LEFTPAREN "("
-#define RIGHTPAREN ")"
-#define NUMBER "int"
-#define VARIABLE "var"
-#define NEWLINE "\n"
-%}
-
-%%
-
-[a-z]+   {
-	   //yylval.ti.value = 0.0;
-	  // yylval.ti.name =  (char *) strdup(yytext);
-	   printf( VARIABLE);
-        }
-
-[0-9]+  {  
-          // yylval.ti.value = atof(yytext);
-	   //yylval.ti.name = NULL;
-	   printf( NUMBER);
-        }
-
-\+    printf( PLUS);
-\-    printf( MINUS);
-\*    printf( TIMES);
-\/    printf( DIVIDE);
-\(    printf( LEFTPAREN);
-\)    printf( RIGHTPAREN);
-
-\n    printf( NEWLINE);
-
-[ ]   ;
-
-.       printf("Invalid character\n");
-
-%%
-
-int yywrap() {
-  return 1;
-}
