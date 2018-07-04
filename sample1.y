@@ -1,29 +1,63 @@
 %start expr_list
 
-   %token SYMBOL
-   %token TEXT
-   %token NUMBER
-   %token NL
-   %token LP
-   %token RP
+%{
+#include "ASTList.h"
+#include "ASTNode.h"
+#include "ASTText.h"
+#include "ASTInt.h"
+#include <iostream>
+
+// Bring the standard library into the
+// global namespace
+using namespace std;
+
+// Prototypes to keep the compiler happy
+void yyerror (const char *error);
+int  yylex ();
+%}
 
 
-   %%
-	
+%union {
+        int number;
+        char *string;
+        ASTNode *node;
+        ASTList *list;
+}
 
-   expr_list:
-   | LP expression RP expr_list 	{ $$ = expr($2,$4) }
-   | LP expr_list RP			{ $$ = $1 }
-	;
-   expression:
-     LP word NUMBER NUMBER RP	{ $$ = exp($2,$3,$4) }
-   | LP word NUMBER TEXT RP	{ $$ = exp($2,$3,$4) }
-   | LP word TEXT NUMBER RP	{ $$ = exp($2,$3,$4) }
-   | LP word TEXT TEXT RP	{ $$ = exp($2,$3,$4) }
-   ;
-	
-   word:
-      NUMBER 	{ $$ = $1 }
-   |  SYMBOL	{ $$ = $1 }
-   |  TEXT	{ $$ = $1 }
-   ;
+%token <string> SYMBOL
+%token <string> TEKST
+%token <number> NUMBER
+%token NL
+%token LP
+%token RP
+
+%type <node> expression
+%type <list> expr_list
+
+%%
+
+expr_list: 				        { $$ = new ASTList(); }
+	 | expr_list expression   	{ $$ = new ASTList($1,$2); }
+	 ;
+expression: LP expr_list RP	{ $$ = (ASTNode*)(new ASTList($2)); }
+	  | TEKST		{ $$ = (ASTNode*)(new ASTText($1)); }
+	  | SYMBOL		{ $$ = (ASTNode*)(new ASTText($1)); }
+	  | NUMBER		{ $$ = (ASTNode*)(new ASTInt($1)); }
+	  ;
+%%
+
+
+void yyerror (const char *error)
+{
+  cout << error << endl;
+}
+
+
+
+/*
+http://www.tldp.org/HOWTO/Lex-YACC-HOWTO.html#toc5
+
+https://www.gnu.org/software/bison/manual/html_node/Understanding.html
+https://www.gnu.org/software/bison/manual/html_node/Reduce_002fReduce.html
+https://www.gnu.org/software/bison/manual/html_node/Shift_002fReduce.html
+*/
